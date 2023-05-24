@@ -7,8 +7,8 @@ from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 base_url = "http://api.esportsearnings.com/v0/LookupPlayerById"
-apikey = "<7ccb2bf499c272fc4c3995ce7be04e772ab97c5677e184a426e2d94e2400420a>"
-directory = "<C:\\Users\\joaoc\\OneDrive\\Área de Trabalho\\eSports Project\\>"
+apikey = "7ccb2bf499c272fc4c3995ce7be04e772ab97c5677e184a426e2d94e2400420a"
+directory = "C:\\Users\\joaoc\\OneDrive\\Área de Trabalho\\eSports Project\\"
 
 os.makedirs(directory, exist_ok=True)
 
