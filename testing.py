@@ -112,7 +112,7 @@ def save_data(data, file_name):
     with open(file_name, "a", newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         reader = csv.reader(data.splitlines())
-        if os.path.exists(file_name) and os.path.getsize(file_name) > 0:
+        if os.path.exists(file_name) and os.path.getsize(file_name) > 0 and data:
             next(reader)  # skip header
         for row in reader:
             writer.writerow(row)
@@ -191,8 +191,8 @@ def main():
             offset += 100
             rg += 1
 
-         # Set last offset
-            set_last_offset(offset)
+        # Set last offset
+        set_last_offset(offset)
 
         # Set last rg if method requires rg parameter
         if method_number in [1, 2, 4, 7, 5, 10, 12]:
