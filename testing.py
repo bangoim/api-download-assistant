@@ -8,9 +8,6 @@ from urllib.parse import urlparse
 # Disable warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# Define API key
-apikey = "<Your API Key>"
-
 # Define download directory
 download_dir = "<Your Download Directory>"
 
@@ -151,6 +148,10 @@ def get_method_number():
 
 # Define main function
 def main():
+    # Get API key
+    global apikey
+    apikey = input("Please enter your API key: ")
+    
     # Get method number
     method_number = get_method_number()
 
