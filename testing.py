@@ -5,11 +5,13 @@ import csv
 import urllib3
 from urllib.parse import urlparse
 
+os.system('cls')
+
 # Disable warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Define download directory
-download_dir = "<Your Download Directory>"
+download_dir = "<download_dir_here>"
 
 # Define offset file
 offset_file = os.path.join(download_dir, "last_offset.txt")
@@ -141,7 +143,7 @@ def set_last_offset_and_rg(offset, rg):
 
 # Define method to get method number
 def get_method_number():
-    print("Please select a method number:")
+    print("\nPlease select a method number:")
     for key, value in methods.items():
         print(f"{key}: {value.__name__}")
     return int(input("Method number: "))
@@ -151,7 +153,7 @@ def main():
     # Get API key
     global apikey
     apikey = input("Please enter your API key: ")
-    
+
     # Get method number
     method_number = get_method_number()
 
@@ -165,6 +167,7 @@ def main():
     # Loop until no more data
     while True:
         # Get URL
+        print('')
         if method_number in [1, 2, 4, 7]:
             url = methods[method_number](rg)
             print(f"Downloading data for rg {rg}...")
@@ -176,7 +179,7 @@ def main():
             print(f"Downloading data for offset {offset} and rg {rg}...")
 
         # Download data
-        data = download_data(url)
+        data = download_data(url, offset, rg)
 
         # Check if data is not None
         if data is not None:
