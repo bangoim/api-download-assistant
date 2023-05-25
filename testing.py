@@ -6,13 +6,9 @@ from urllib3.exceptions import InsecureRequestWarning
 
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
-apikey = "<your_api_key_here>"
-directory = "<your_directory_here>"
+apikey = "7ccb2bf499c272fc4c3995ce7be04e772ab97c5677e184a426e2d94e2400420a"
+directory = "C:\\Users\\joaoc\\OneDrive\\Área de Trabalho\\eSports Project\\"
 os.makedirs(directory, exist_ok=True)
-last_offset_file = os.path.join(directory, "last_offset.txt")
-output_file = os.path.join(directory, base_url.split("/")[-1] + ".csv")
-
-failed_offsets = []
 
 option = int(input("Select an option:\n1. LookupHighestEarningPlayers\n2. LookupPlayerById\n"))
 if option == 1:
@@ -24,6 +20,11 @@ elif option == 2:
 else:
     print("Invalid option.")
     exit()
+
+last_offset_file = os.path.join(directory, "last_offset.txt")
+output_file = os.path.join(directory, base_url.split("/")[-1] + ".csv")
+
+failed_offsets = []
 
 if os.path.exists(last_offset_file):
     with open(last_offset_file, "r") as file:
