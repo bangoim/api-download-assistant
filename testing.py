@@ -11,7 +11,7 @@ os.system('cls')
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Define download directory
-download_dir = "C:\\Users\\joaoc\\OneDrive\\Área de Trabalho\\eSports Project\\"
+download_dir = "<download_dir_here>"
 
 # Define offset file
 offset_file = os.path.join(download_dir, "last_offset.txt")
@@ -103,10 +103,11 @@ def download_data(url, offset, rg):
                 print(f"Failed to download data for rg {rg}.")
             if offset is not None:
                 with open(failed_offsets_file, "a") as f:
-                    f.write(str(offset) + "\n")
+                    f.write(str(offset) + ",")
             if rg is not None:
                 with open(failed_rg_file, "a") as f:
-                    f.write(str(rg) + "\n")
+                    f.write(str(rg) + ",")
+
             return None
     except Exception as e:
         if offset is not None and rg is not None:
@@ -228,7 +229,7 @@ def main():
             else:
                 offset += 100
                 rg += 1
-            
+
             # Set last offset if method requires offset parameter
             if method_number in [2, 3, 5, 6, 10, 11, 12]:
                 set_last_offset(offset)
@@ -240,27 +241,31 @@ def main():
             # Delay
             time.sleep(3)
         else:
-            break
+            # Increment no data counter
+            no_data_counter += 1
+            # Continue to the next iteration
+            continue
 
     # Print completion message
     if os.path.exists(failed_offsets_file):
         with open(failed_offsets_file, "r") as f:
-            failed_offsets = f.readlines()
+            failed_offsets = f.readline().strip().rstrip(',').split(',')
     else:
         failed_offsets = []
 
     if os.path.exists(failed_rg_file):
         with open(failed_rg_file, "r") as f:
-            failed_rg = f.readlines()
+            failed_rg = f.readline().strip().rstrip(',').split(',')
     else:
         failed_rg = []
 
     if len(failed_offsets) > 0 or len(failed_rg) > 0:
         print("Download completed. But not every offset or rg could be downloaded.")
         if len(failed_offsets) > 0:
-            print("Failed to download the following offsets: ", failed_offsets)
+            print("Failed to download the following offsets: ", ', '.join(failed_offsets))
         if len(failed_rg) > 0:
-            print("Failed to download the following rg: ", failed_rg)
+            print("Failed to download the following rg: ", ', '.join(failed_rg))
+
     else:
         print("Download completed.")
 
