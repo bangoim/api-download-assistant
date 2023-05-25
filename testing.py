@@ -239,7 +239,7 @@ def main():
                 set_last_rg(rg)
 
             # Delay
-            time.sleep(3)
+            time.sleep(1.2)
         else:
             # Increment no data counter
             no_data_counter += 1
