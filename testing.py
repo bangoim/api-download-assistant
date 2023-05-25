@@ -11,7 +11,7 @@ os.system('cls')
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Define download directory
-download_dir = "<download_dir_here>"
+download_dir = "C:\\Users\\joaoc\\OneDrive\\Área de Trabalho\\eSports Project\\"
 
 # Define offset file
 offset_file = os.path.join(download_dir, "last_offset.txt")
@@ -90,6 +90,7 @@ def download_data(url, offset, rg):
             content = response.content.decode('utf-8', errors='replace')
             # Return None if content is empty
             if content.strip() == "":
+                print(f"Offset {offset} has no data." if offset is not None else f"Rg {rg} has no data.")
                 return None
             else:
                 return content
@@ -181,8 +182,11 @@ def main():
     offset = last_offset
     rg = last_rg
 
-    # Loop until no more data
-    while True:
+    # Initialize no data counter
+    no_data_counter = 0
+
+    # Loop until no more data or no data counter reaches threshold
+    while no_data_counter < 15:
         # Get URL
         if method_number in [1, 2, 4, 7]:
             url = methods[method_number](rg)
@@ -197,15 +201,6 @@ def main():
         # Download data
         data = download_data(url, offset, rg)
 
-        # Increment offset and rg
-        if method_number in [1, 2, 4, 7]:
-            rg += 1
-        elif method_number in [3, 6, 11]:
-            offset += 100
-        else:
-            offset += 100
-            rg += 1
-
         # Set last offset
         set_last_offset(offset)
 
@@ -215,12 +210,32 @@ def main():
 
         # Check if data is not None
         if data is not None:
+            # Reset no data counter
+            no_data_counter = 0
+
             # Get file name
             base_url = urlparse(url).path.split('/')[-1]
             file_name = os.path.join(download_dir, base_url + ".csv")
 
             # Save data
             save_data(data, file_name)
+
+            # Increment offset and rg
+            if method_number in [1, 2, 4, 7]:
+                rg += 1
+            elif method_number in [3, 6, 11]:
+                offset += 100
+            else:
+                offset += 100
+                rg += 1
+            
+            # Set last offset if method requires offset parameter
+            if method_number in [2, 3, 5, 6, 10, 11, 12]:
+                set_last_offset(offset)
+
+            # Set last rg if method requires rg parameter
+            if method_number in [1, 2, 4, 7, 5, 10, 12]:
+                set_last_rg(rg)
 
             # Delay
             time.sleep(3)
