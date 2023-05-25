@@ -133,13 +133,15 @@ def get_last_offset_and_rg(method_number):
 
     return last_offset, last_rg
 
-# Define method to set last offset and rg
-def set_last_offset_and_rg(offset, rg):
+# Define method to set last offset
+def set_last_offset(offset):
     with open(offset_file, "w") as f:
         f.write(str(offset))
+
+# Define method to set last rg
+def set_last_rg(rg):
     with open(rg_file, "w") as f:
         f.write(str(rg))
-
 
 # Define method to get method number
 def get_method_number():
@@ -184,14 +186,19 @@ def main():
         # Check if data is not None
         if data is not None:
             # Get file name
-            base_url = urlparse(url).netloc
+            base_url = urlparse(url).path.split('/')[-1]
             file_name = os.path.join(download_dir, base_url + ".csv")
 
             # Save data
             save_data(data, file_name)
 
-            # Set last offset and rg
-            set_last_offset_and_rg(offset, rg)
+            # Set last offset
+            set_last_offset(offset)
+
+            # Set last rg if method requires rg parameter
+            if method_number in [1, 2, 4, 7, 5, 10, 12]:
+                set_last_rg(rg)
+
 
             # Increment offset and rg
             if method_number in [1, 2, 4, 7]:
