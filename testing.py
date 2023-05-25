@@ -87,7 +87,12 @@ def download_data(url, offset, rg):
         # Check response status
         if response.status_code == 200:
             # Handle non-ASCII characters
-            return response.content.decode('utf-8', errors='replace')
+            content = response.content.decode('utf-8', errors='replace')
+            # Return None if content is empty
+            if content.strip() == "":
+                return None
+            else:
+                return content
         else:
             print(f"Failed to download data for url {url}.")
             if offset is not None:
@@ -105,6 +110,8 @@ def download_data(url, offset, rg):
         if rg is not None:
             with open(failed_rg_file, "a") as f:
                 f.write(str(rg) + "\n")
+        return None
+te(str(rg) + "\n")
         return None
 
 # Define method to save data
