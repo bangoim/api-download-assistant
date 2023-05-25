@@ -94,7 +94,12 @@ def download_data(url, offset, rg):
             else:
                 return content
         else:
-            print(f"Failed to download data for url {url}.")
+            if offset is not None and rg is not None:
+                print(f"Failed to download data for offset {offset} and rg {rg}.")
+            elif offset is not None:
+                print(f"Failed to download data for offset {offset}.")
+            elif rg is not None:
+                print(f"Failed to download data for rg {rg}.")
             if offset is not None:
                 with open(failed_offsets_file, "a") as f:
                     f.write(str(offset) + "\n")
@@ -103,15 +108,18 @@ def download_data(url, offset, rg):
                     f.write(str(rg) + "\n")
             return None
     except Exception as e:
-        print(f"Exception occurred while downloading data for url {url}: {e}")
+        if offset is not None and rg is not None:
+            print(f"Exception occurred while downloading data for offset {offset} and rg {rg}: {e}")
+        elif offset is not None:
+            print(f"Exception occurred while downloading data for offset {offset}: {e}")
+        elif rg is not None:
+            print(f"Exception occurred while downloading data for rg {rg}: {e}")
         if offset is not None:
             with open(failed_offsets_file, "a") as f:
                 f.write(str(offset) + "\n")
         if rg is not None:
             with open(failed_rg_file, "a") as f:
                 f.write(str(rg) + "\n")
-        return None
-te(str(rg) + "\n")
         return None
 
 # Define method to save data
