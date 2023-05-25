@@ -17,45 +17,51 @@ download_dir = "<Your Download Directory>"
 # Define offset file
 offset_file = os.path.join(download_dir, "last_offset.txt")
 
+# Define rg file
+rg_file = os.path.join(download_dir, "last_rg.txt")
+
 # Define failed offsets file
 failed_offsets_file = os.path.join(download_dir, "failed_offsets.txt")
 
-# Define methods
-def lookup_player_by_id(offset):
-    return f"http://api.esportsearnings.com/v0/LookupPlayerById?apikey={apikey}&playerid={offset}&format=csv"
+# Define failed rg file
+failed_rg_file = os.path.join(download_dir, "failed_rg.txt")
 
-def lookup_player_tournaments(offset):
-    return f"http://api.esportsearnings.com/v0/LookupPlayerTournaments?apikey={apikey}&playerid={offset}&offset={offset}&format=csv"
+# Define methods
+def lookup_player_by_id(rg):
+    return f"http://api.esportsearnings.com/v0/LookupPlayerById?apikey={apikey}&playerid={rg}&format=csv"
+
+def lookup_player_tournaments(rg, offset):
+    return f"http://api.esportsearnings.com/v0/LookupPlayerTournaments?apikey={apikey}&playerid={rg}&offset={offset}&format=csv"
 
 def lookup_highest_earning_players(offset):
     return f"http://api.esportsearnings.com/v0/LookupHighestEarningPlayers?apikey={apikey}&offset={offset}&format=csv"
 
-def lookup_game_by_id(offset):
-    return f"http://api.esportsearnings.com/v0/LookupGameById?apikey={apikey}&gameid={offset}&format=csv"
+def lookup_game_by_id(rg):
+    return f"http://api.esportsearnings.com/v0/LookupGameById?apikey={apikey}&gameid={rg}&format=csv"
 
-def lookup_highest_earning_players_by_game(offset):
-    return f"http://api.esportsearnings.com/v0/LookupHighestEarningPlayersByGame?apikey={apikey}&gameid={offset}&offset={offset}&format=csv"
+def lookup_highest_earning_players_by_game(rg, offset):
+    return f"http://api.esportsearnings.com/v0/LookupHighestEarningPlayersByGame?apikey={apikey}&gameid={rg}&offset={offset}&format=csv"
 
 def lookup_recent_tournaments(offset):
     return f"http://api.esportsearnings.com/v0/LookupRecentTournaments?apikey={apikey}&offset={offset}&format=csv"
 
-def lookup_tournament_by_id(offset):
-    return f"http://api.esportsearnings.com/v0/LookupTournamentById?apikey={apikey}&tournamentid={offset}&format=csv"
+def lookup_tournament_by_id(rg):
+    return f"http://api.esportsearnings.com/v0/LookupTournamentById?apikey={apikey}&tournamentid={rg}&format=csv"
 
-def lookup_tournament_results_by_tournament_id(offset):
-    return f"http://api.esportsearnings.com/v0/LookupTournamentResultsByTournamentId?apikey={apikey}&tournamentid={offset}&format=csv"
+def lookup_tournament_results_by_tournament_id(rg):
+    return f"http://api.esportsearnings.com/v0/LookupTournamentResultsByTournamentId?apikey={apikey}&tournamentid={rg}&format=csv"
 
-def lookup_tournament_team_results_by_tournament_id(offset):
-    return f"http://api.esportsearnings.com/v0/LookupTournamentTeamResultsByTournamentId?apikey={apikey}&tournamentid={offset}&format=csv"
+def lookup_tournament_team_results_by_tournament_id(rg):
+    return f"http://api.esportsearnings.com/v0/LookupTournamentTeamResultsByTournamentId?apikey={apikey}&tournamentid={rg}&format=csv"
 
-def lookup_tournament_team_players_by_tournament_id(offset):
-    return f"http://api.esportsearnings.com/v0/LookupTournamentTeamPlayersByTournamentId?apikey={apikey}&tournamentid={offset}&format=csv"
+def lookup_tournament_team_players_by_tournament_id(rg):
+    return f"http://api.esportsearnings.com/v0/LookupTournamentTeamPlayersByTournamentId?apikey={apikey}&tournamentid={rg}&format=csv"
 
 def lookup_highest_earning_teams(offset):
     return f"http://api.esportsearnings.com/v0/LookupHighestEarningTeams?apikey={apikey}&offset={offset}&format=csv"
 
-def lookup_highest_earning_teams_by_game(offset):
-    return f"http://api.esportsearnings.com/v0/LookupHighestEarningTeamsByGame?apikey={apikey}&gameid={offset}&offset={offset}&format=csv"
+def lookup_highest_earning_teams_by_game(rg, offset):
+    return f"http://api.esportsearnings.com/v0/LookupHighestEarningTeamsByGame?apikey={apikey}&gameid={rg}&offset={offset}&format=csv"
 
 # Define methods dictionary
 methods = {
@@ -74,7 +80,7 @@ methods = {
 }
 
 # Define method to download data
-def download_data(url):
+def download_data(url, offset, rg):
     try:
         # Send request
         response = requests.get(url, verify=False)
@@ -85,13 +91,21 @@ def download_data(url):
             return response.content.decode('utf-8', errors='replace')
         else:
             print(f"Failed to download data for url {url}.")
-            with open(failed_offsets_file, "a") as f:
-                f.write(url + "\n")
+            if offset is not None:
+                with open(failed_offsets_file, "a") as f:
+                    f.write(str(offset) + "\n")
+            if rg is not None:
+                with open(failed_rg_file, "a") as f:
+                    f.write(str(rg) + "\n")
             return None
     except Exception as e:
         print(f"Exception occurred while downloading data for url {url}: {e}")
-        with open(failed_offsets_file, "a") as f:
-            f.write(url + "\n")
+        if offset is not None:
+            with open(failed_offsets_file, "a") as f:
+                f.write(str(offset) + "\n")
+        if rg is not None:
+            with open(failed_rg_file, "a") as f:
+                f.write(str(rg) + "\n")
         return None
 
 # Define method to save data
@@ -104,22 +118,29 @@ def save_data(data, file_name):
         for row in reader:
             writer.writerow(row)
 
-# Define method to get last offset
-def get_last_offset(method_number):
+# Define method to get last offset and rg
+def get_last_offset_and_rg(method_number):
     if os.path.exists(offset_file):
         with open(offset_file, "r") as f:
-            return int(f.read().strip())
+            last_offset = int(f.readline().strip())
     else:
-        # Return 1000 if the method requires the playerid parameter
-        if method_number in [1, 2]:
-            return 1000
-        else:
-            return 0    
+        last_offset = 0 if method_number not in [1, 2] else 1000
 
-# Define method to set last offset
-def set_last_offset(offset):
+    if os.path.exists(rg_file):
+        with open(rg_file, "r") as f:
+            last_rg = int(f.readline().strip())
+    else:
+        last_rg = 0 if method_number not in [1, 2, 4, 7] else 1000
+
+    return last_offset, last_rg
+
+# Define method to set last offset and rg
+def set_last_offset_and_rg(offset, rg):
     with open(offset_file, "w") as f:
         f.write(str(offset))
+    with open(rg_file, "w") as f:
+        f.write(str(rg))
+
 
 # Define method to get method number
 def get_method_number():
@@ -133,22 +154,27 @@ def main():
     # Get method number
     method_number = get_method_number()
 
-    # Get last offset
-    last_offset = get_last_offset(method_number)
+    # Get last offset and rg
+    last_offset, last_rg = get_last_offset_and_rg(method_number)
 
-    # Initialize offset
+    # Initialize offset and rg
     offset = last_offset
-
-    # Initialize failed offsets
-    failed_offsets = []
+    rg = last_rg
 
     # Loop until no more data
     while True:
         # Get URL
-        url = methods[method_number](offset)
+        if method_number in [1, 2, 4, 7]:
+            url = methods[method_number](rg)
+            print(f"Downloading data for rg {rg}...")
+        elif method_number in [3, 6, 11]:
+            url = methods[method_number](offset)
+            print(f"Downloading data for offset {offset}...")
+        else:
+            url = methods[method_number](offset, rg)
+            print(f"Downloading data for offset {offset} and rg {rg}...")
 
         # Download data
-        print(f"Downloading data for offset {offset}...")
         data = download_data(url)
 
         # Check if data is not None
@@ -160,14 +186,17 @@ def main():
             # Save data
             save_data(data, file_name)
 
-            # Set last offset
-            set_last_offset(offset)
+            # Set last offset and rg
+            set_last_offset_and_rg(offset, rg)
 
-            # Increment offset
+            # Increment offset and rg
             if method_number in [1, 2, 4, 7]:
-                offset += 1
+                rg += 1
+            elif method_number in [3, 6, 11]:
+                offset += 100
             else:
                 offset += 100
+                rg += 1
 
             # Delay
             time.sleep(3)
