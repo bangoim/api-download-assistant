@@ -228,10 +228,17 @@ def main():
             break
 
     # Print completion message
-    with open(failed_offsets_file, "r") as f:
-        failed_offsets = f.readlines()
-    with open(failed_rg_file, "r") as f:
-        failed_rg = f.readlines()
+    if os.path.exists(failed_offsets_file):
+        with open(failed_offsets_file, "r") as f:
+            failed_offsets = f.readlines()
+    else:
+        failed_offsets = []
+
+    if os.path.exists(failed_rg_file):
+        with open(failed_rg_file, "r") as f:
+            failed_rg = f.readlines()
+    else:
+        failed_rg = []
 
     if len(failed_offsets) > 0 or len(failed_rg) > 0:
         print("Download completed. But not every offset or rg could be downloaded.")
@@ -241,6 +248,7 @@ def main():
             print("Failed to download the following rg: ", failed_rg)
     else:
         print("Download completed.")
+
 
 # Run main function
 if __name__ == "__main__":
