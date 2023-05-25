@@ -202,13 +202,6 @@ def main():
         # Download data
         data = download_data(url, offset, rg)
 
-        # Set last offset
-        set_last_offset(offset)
-
-        # Set last rg if method requires rg parameter
-        if method_number in [1, 2, 4, 7, 5, 10, 12]:
-            set_last_rg(rg)
-
         # Check if data is not None
         if data is not None:
             # Reset no data counter
@@ -247,13 +240,13 @@ def main():
             continue
 
     # Print completion message
-    if os.path.exists(failed_offsets_file):
+    if os.path.exists(failed_offsets_file) and method_number in [2, 3, 5, 6, 10, 11, 12]:
         with open(failed_offsets_file, "r") as f:
             failed_offsets = f.readline().strip().rstrip(',').split(',')
     else:
         failed_offsets = []
 
-    if os.path.exists(failed_rg_file):
+    if os.path.exists(failed_rg_file) and method_number in [1, 2, 4, 7, 5, 10, 12]:
         with open(failed_rg_file, "r") as f:
             failed_rg = f.readline().strip().rstrip(',').split(',')
     else:
