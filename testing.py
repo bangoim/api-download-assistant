@@ -169,7 +169,6 @@ def main():
     # Loop until no more data
     while True:
         # Get URL
-        print('')
         if method_number in [1, 2, 4, 7]:
             url = methods[method_number](rg)
             print(f"Downloading data for rg {rg}...")
@@ -183,6 +182,22 @@ def main():
         # Download data
         data = download_data(url, offset, rg)
 
+        # Increment offset and rg
+        if method_number in [1, 2, 4, 7]:
+            rg += 1
+        elif method_number in [3, 6, 11]:
+            offset += 100
+        else:
+            offset += 100
+            rg += 1
+
+         # Set last offset
+            set_last_offset(offset)
+
+        # Set last rg if method requires rg parameter
+        if method_number in [1, 2, 4, 7, 5, 10, 12]:
+            set_last_rg(rg)
+
         # Check if data is not None
         if data is not None:
             # Get file name
@@ -191,23 +206,6 @@ def main():
 
             # Save data
             save_data(data, file_name)
-
-            # Set last offset
-            set_last_offset(offset)
-
-            # Set last rg if method requires rg parameter
-            if method_number in [1, 2, 4, 7, 5, 10, 12]:
-                set_last_rg(rg)
-
-
-            # Increment offset and rg
-            if method_number in [1, 2, 4, 7]:
-                rg += 1
-            elif method_number in [3, 6, 11]:
-                offset += 100
-            else:
-                offset += 100
-                rg += 1
 
             # Delay
             time.sleep(3)
@@ -228,7 +226,6 @@ def main():
             print("Failed to download the following rg: ", failed_rg)
     else:
         print("Download completed.")
-
 
 # Run main function
 if __name__ == "__main__":
