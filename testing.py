@@ -23,7 +23,7 @@ rg_file = os.path.join(download_dir, "last_rg.txt")
 failed_offsets_file = os.path.join(download_dir, "failed_offsets.txt")
 
 # Define failed rg file
-failed_rg_file = os.path.join(download_dir, "failed_rg.txt")
+failed_rgs_file = os.path.join(download_dir, "failed_rgs.txt")
 
 # Define methods
 def lookup_player_by_id(rg):
@@ -89,7 +89,7 @@ def download_data(url, offset, rg):
             # Handle non-ASCII characters
             content = response.content.decode('utf-8', errors='replace')
             # Return None if content is empty
-            if content.strip() == "":
+            if content.strip() == "" or "null" in content:
                 print(f"Offset {offset} has no data." if offset is not None else f"Rg {rg} has no data.")
                 return None
             else:
@@ -105,7 +105,7 @@ def download_data(url, offset, rg):
                 with open(failed_offsets_file, "a") as f:
                     f.write(str(offset) + ",")
             if rg is not None:
-                with open(failed_rg_file, "a") as f:
+                with open(failed_rgs_file, "a") as f:
                     f.write(str(rg) + ",")
 
             return None
@@ -120,7 +120,7 @@ def download_data(url, offset, rg):
             with open(failed_offsets_file, "a") as f:
                 f.write(str(offset) + "\n")
         if rg is not None:
-            with open(failed_rg_file, "a") as f:
+            with open(failed_rgs_file, "a") as f:
                 f.write(str(rg) + "\n")
         return None
 
@@ -246,18 +246,18 @@ def main():
     else:
         failed_offsets = []
 
-    if os.path.exists(failed_rg_file) and method_number in [1, 2, 4, 7, 5, 10, 12]:
-        with open(failed_rg_file, "r") as f:
-            failed_rg = f.readline().strip().rstrip(',').split(',')
+    if os.path.exists(failed_rgs_file) and method_number in [1, 2, 4, 7, 5, 10, 12]:
+        with open(failed_rgs_file, "r") as f:
+            failed_rgs = f.readline().strip().rstrip(',').split(',')
     else:
-        failed_rg = []
+        failed_rgs = []
 
-    if len(failed_offsets) > 0 or len(failed_rg) > 0:
+    if len(failed_offsets) > 0 or len(failed_rgs) > 0:
         print("Download completed. But not every offset or rg could be downloaded.")
         if len(failed_offsets) > 0:
             print("Failed to download the following offsets: ", ', '.join(failed_offsets))
-        if len(failed_rg) > 0:
-            print("Failed to download the following rg: ", ', '.join(failed_rg))
+        if len(failed_rgs) > 0:
+            print("Failed to download the following rg: ", ', '.join(failed_rgs))
 
     else:
         print("Download completed.")
