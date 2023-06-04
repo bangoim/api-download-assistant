@@ -121,7 +121,7 @@ def download_data(url, offset, rg, method_number):
             content = response.content.decode('utf-8', errors='replace')
             # Return None if content is empty
             if content.strip() == "" or "null" in content:
-                print(f"Offset {offset} has no data." if offset is not None else f"Rg {rg} has no data.")
+                # print(f"Offset {offset} has no data." if offset is not None else f"Rg {rg} has no data.")
                 return None
             else:
                 return content
@@ -195,7 +195,7 @@ def main():
     no_data_counter = 0
 
     # Loop until no more data or no data counter reaches threshold
-    while no_data_counter < 15:
+    while no_data_counter < 25:
         # Get URL
         if method_number in [1, 4, 7]:
             url = methods[method_number](rg)
@@ -204,13 +204,15 @@ def main():
             url = methods[method_number](offset)
             print(f"Downloading data for offset {offset}...")
         elif method_number in [2, 5, 12]:
+            # Reset offset for each new rg
+            offset = 0
             # Loop over offsets for a single rg
             while True:
                 url = methods[method_number](rg, offset)
                 print(f"Downloading data for rg {rg} and offset {offset}...")
 
                 # Download data
-                data = download_data(url, offset, rg)
+                data = download_data(url, offset, rg, method_number)
 
                 # Check if data is not None
                 if data is not None:
@@ -235,6 +237,8 @@ def main():
                 else:
                     # Increment no data counter
                     no_data_counter += 1
+                    # Print the correct offset that has no data
+                    print(f"Offset {offset} has no data." if offset is not None else f"Rg {rg} has no data.")
                     # Break the inner loop to move on to the next rg
                     break
 
@@ -246,7 +250,7 @@ def main():
             set_last_rg(rg)
 
         # Download data
-        data = download_data(url, offset, rg)
+        data = download_data(url, offset, rg, method_number)
 
         # Check if data is not None
         if data is not None:
@@ -282,6 +286,9 @@ def main():
         else:
             # Increment no data counter
             no_data_counter += 1
+            # Print the correct offset that has no data
+            if method_number not in [2, 5, 12]:
+                print(f"Offset {offset} has no data." if offset is not None else f"Rg {rg} has no data.")
             # Continue to the next iteration
             continue
 
