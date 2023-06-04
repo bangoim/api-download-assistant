@@ -119,6 +119,9 @@ def download_data(url, offset, rg, method_number):
         if response.status_code == 200:
             # Handle non-ASCII characters
             content = response.content.decode('utf-8', errors='replace')
+            print(f"Content for offset {offset} and rg {rg}: {content}")
+            # Strip leading/trailing whitespace
+            content = content.strip()
             # Return None if content is empty
             if content.strip() == "" or "null" in content:
                 # print(f"Offset {offset} has no data." if offset is not None else f"Rg {rg} has no data.")
@@ -184,41 +187,29 @@ def main():
     # Get method number
     method_number = get_method_number()
 
-    # Get last offset and rg
-    last_offset, last_rg = get_last_offset_and_rg(method_number)
+    # Ask user if they want to download specific rg and offset
+    specific_download = input("Do you want to download specific rg and offset? (y/n): ")
 
-    # Initialize offset and rg
-    offset = last_offset
-    rg = last_rg
+    if specific_download.lower() == 'y':
+        # Get specific rg and offset from user
+        specific_rg = input("Please enter specific rg (separate multiple rgs with comma): ")
+        specific_offset = input("Please enter specific offset (separate multiple offsets with comma): ")
 
-    # Initialize no data counter
-    no_data_counter = 0
+        # Convert to list of integers
+        specific_rg = list(map(int, specific_rg.split(','))) if specific_rg else []
+        specific_offset = list(map(int, specific_offset.split(','))) if specific_offset else []
 
-    # Loop until no more data or no data counter reaches threshold
-    while no_data_counter < 25:
-        # Get URL
-        if method_number in [1, 4, 7]:
-            url = methods[method_number](rg)
-            print(f"Downloading data for rg {rg}...")
-        elif method_number in [3, 6, 11]:
-            url = methods[method_number](offset)
-            print(f"Downloading data for offset {offset}...")
-        elif method_number in [2, 5, 12]:
-            # Reset offset for each new rg
-            offset = 0
-            # Loop over offsets for a single rg
-            while True:
+        # Loop over specific rg and offset
+        for rg in specific_rg:
+            for offset in specific_offset:
+                # Get URL
                 url = methods[method_number](rg, offset)
-                print(f"Downloading data for rg {rg} and offset {offset}...")
 
                 # Download data
                 data = download_data(url, offset, rg, method_number)
 
                 # Check if data is not None
                 if data is not None:
-                    # Reset no data counter
-                    no_data_counter = 0
-
                     # Get file name
                     base_url = urlparse(url).path.split('/')[-1]
                     file_name = os.path.join(download_dir, base_url + ".csv")
@@ -226,94 +217,139 @@ def main():
                     # Save data
                     save_data(data, file_name)
 
-                    # Increment offset
-                    offset += 100
-
-                    # Set last offset
-                    set_last_offset(offset)
-
                     # Delay
                     time.sleep(1.2)
-                else:
-                    # Increment no data counter
-                    no_data_counter += 1
-                    # Print the correct offset that has no data
-                    print(f"Offset {offset} has no data." if offset is not None else f"Rg {rg} has no data.")
-                    # Break the inner loop to move on to the next rg
-                    break
+    else:
+        # Get last offset and rg
+        last_offset, last_rg = get_last_offset_and_rg(method_number)
 
-            # Increment rg and reset offset
-            rg += 1
-            offset = 0
+        # Initialize offset and rg
+        offset = last_offset
+        rg = last_rg
 
-            # Set last rg
-            set_last_rg(rg)
+        # Initialize no data counter
+        no_data_counter = 0
 
-        # Download data
-        data = download_data(url, offset, rg, method_number)
-
-        # Check if data is not None
-        if data is not None:
-            # Reset no data counter
-            no_data_counter = 0
-
-            # Get file name
-            base_url = urlparse(url).path.split('/')[-1]
-            file_name = os.path.join(download_dir, base_url + ".csv")
-
-            # Save data
-            save_data(data, file_name)
-
-            # Increment offset and rg
+        # Loop until no more data or no data counter reaches threshold
+        while no_data_counter < 25:
+            # Get URL
             if method_number in [1, 4, 7]:
-                rg += 1
+                url = methods[method_number](rg)
+                print(f"Downloading data for rg {rg}...")
             elif method_number in [3, 6, 11]:
-                offset += 100
-            else:
-                offset += 100
+                url = methods[method_number](offset)
+                print(f"Downloading data for offset {offset}...")
+            elif method_number in [2, 5, 12]:
+                # Reset offset for each new rg
+                offset = 0
+                # Loop over offsets for a single rg
+                while True:
+                    url = methods[method_number](rg, offset)
+                    print(f"Downloading data for rg {rg} and offset {offset}...")
+
+                    # Download data
+                    data = download_data(url, offset, rg, method_number)
+
+                    # Check if data is not None
+                    if data is not None:
+                        # Reset no data counter
+                        no_data_counter = 0
+
+                        # Get file name
+                        base_url = urlparse(url).path.split('/')[-1]
+                        file_name = os.path.join(download_dir, base_url + ".csv")
+
+                        # Save data
+                        save_data(data, file_name)
+
+                        # Increment offset
+                        offset += 100
+
+                        # Set last offset
+                        set_last_offset(offset)
+
+                        # Delay
+                        time.sleep(1.2)
+                    else:
+                        # Increment no data counter
+                        no_data_counter += 1
+                        # Print the correct offset that has no data
+                        print(f"Offset {offset} has no data." if offset is not None else f"Rg {rg} has no data.")
+                        # Break the inner loop to move on to the next rg
+                        break
+
+                # Increment rg and reset offset
                 rg += 1
+                offset = 0
 
-            # Set last offset if method requires offset parameter
-            if method_number in [2, 3, 5, 6, 10, 11, 12]:
-                set_last_offset(offset)
-
-            # Set last rg if method requires rg parameter
-            if method_number in [1, 2, 4, 7, 5, 10, 12]:
+                # Set last rg
                 set_last_rg(rg)
 
-            # Delay
-            time.sleep(1.2)
+            # Download data
+            data = download_data(url, offset, rg, method_number)
+
+            # Check if data is not None
+            if data is not None:
+                # Reset no data counter
+                no_data_counter = 0
+
+                # Get file name
+                base_url = urlparse(url).path.split('/')[-1]
+                file_name = os.path.join(download_dir, base_url + ".csv")
+
+                # Save data
+                save_data(data, file_name)
+
+                # Increment offset and rg
+                if method_number in [1, 4, 7]:
+                    rg += 1
+                elif method_number in [3, 6, 11]:
+                    offset += 100
+                else:
+                    offset += 100
+                    rg += 1
+
+                # Set last offset if method requires offset parameter
+                if method_number in [2, 3, 5, 6, 10, 11, 12]:
+                    set_last_offset(offset)
+
+                # Set last rg if method requires rg parameter
+                if method_number in [1, 2, 4, 7, 5, 10, 12]:
+                    set_last_rg(rg)
+
+                # Delay
+                time.sleep(1.2)
+            else:
+                # Increment no data counter
+                no_data_counter += 1
+                # Print the correct offset that has no data
+                if method_number not in [2, 5, 12]:
+                    print(f"Offset {offset} has no data." if offset is not None else f"Rg {rg} has no data.")
+                # Continue to the next iteration
+                continue
+
+        # Print completion message
+        if os.path.exists(failed_offsets_file) and method_number in [2, 3, 5, 6, 10, 11, 12]:
+            with open(failed_offsets_file, "r") as f:
+                failed_offsets = f.readline().strip().rstrip(',').split(',')
         else:
-            # Increment no data counter
-            no_data_counter += 1
-            # Print the correct offset that has no data
-            if method_number not in [2, 5, 12]:
-                print(f"Offset {offset} has no data." if offset is not None else f"Rg {rg} has no data.")
-            # Continue to the next iteration
-            continue
+            failed_offsets = []
 
-    # Print completion message
-    if os.path.exists(failed_offsets_file) and method_number in [2, 3, 5, 6, 10, 11, 12]:
-        with open(failed_offsets_file, "r") as f:
-            failed_offsets = f.readline().strip().rstrip(',').split(',')
-    else:
-        failed_offsets = []
+        if os.path.exists(failed_rgs_file) and method_number in [1, 2, 4, 7, 5, 10, 12]:
+            with open(failed_rgs_file, "r") as f:
+                failed_rgs = f.readline().strip().rstrip(',').split(',')
+        else:
+            failed_rgs = []
 
-    if os.path.exists(failed_rgs_file) and method_number in [1, 2, 4, 7, 5, 10, 12]:
-        with open(failed_rgs_file, "r") as f:
-            failed_rgs = f.readline().strip().rstrip(',').split(',')
-    else:
-        failed_rgs = []
+        if len(failed_offsets) > 0 or len(failed_rgs) > 0:
+            print("Download completed. But not every offset or rg could be downloaded.")
+            if len(failed_offsets) > 0:
+                print("Failed to download the following offsets: ", ', '.join(failed_offsets))
+            if len(failed_rgs) > 0:
+                print("Failed to download the following rg: ", ', '.join(failed_rgs))
 
-    if len(failed_offsets) > 0 or len(failed_rgs) > 0:
-        print("Download completed. But not every offset or rg could be downloaded.")
-        if len(failed_offsets) > 0:
-            print("Failed to download the following offsets: ", ', '.join(failed_offsets))
-        if len(failed_rgs) > 0:
-            print("Failed to download the following rg: ", ', '.join(failed_rgs))
-
-    else:
-        print("Download completed.")
+        else:
+            print("Download completed.")
 
 
 # Run main function
